@@ -12,16 +12,19 @@
     <title>Document</title>
 </head>
 <body>
-    <img src="static/images/{{name}}" >
 	<form action="/noteFilePaths">
+	<button type="submit">
+    <img src="static/images/{{name}}" >
+    </button>
+
+   <input type="hidden" id="custId" name="imgfilename" value="{{name}}">
   <input type="checkbox" id="vehicle1" name="category1" value="Considerable">
   <label for="vehicle1">Considerable</label><br>
   <input type="checkbox" id="vehicle2" name="category2" value="BeautyExpress">
   <label for="vehicle2"> BeautyExpress</label><br>
   <input type="checkbox" id="vehicle3" name="category3" value="CaughtInAct">
   <label for="vehicle3"> CaughtInAct</label><br><br>
-  <input type="submit" value="Submit">
-   <input type="hidden" id="custId" name="imgfilename" value="{{name}}">
+  <!-- <input type="submit" value="Submit"> -->
 </form>
 
 </body>
