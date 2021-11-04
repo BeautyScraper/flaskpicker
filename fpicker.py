@@ -3,10 +3,30 @@ import shutil
 from pathlib import Path
 import random
 import re
+import argparse
+import os
+
 
 # inputDir = r'D:\paradise\stuff\Images\walls'
+def dir_path(string):
+    if os.path.isdir(string):
+        return string
+    else:
+        try:
+            _ = Path(string)
+        except:
+            raise NotADirectoryError(string)
+    return string
 
-cnffile = 'config'
+parser = argparse.ArgumentParser()
+
+parser.add_argument('--inputConfig', type=dir_path,default= 'config')
+parser.add_argument('--port', type=int,default= 5000)
+
+args = parser.parse_args()
+
+
+cnffile = args.inputConfig
 # inputDir = r'C:\Heaven\YummyBaked\SuperWemon4\SuperWemon1\club9'
 
 cdir = []
@@ -20,7 +40,8 @@ def main():
    if len(allImages) <= 0:
         return 'No images left in the directory'
    imgfp = imageRender()
-   return render_template("template.html",name=imgfp.name)
+   cpdir = [Path(x).name for x in cdir]
+   return render_template("template.html", name=imgfp.name, outDirs=cpdir)
    # return 'hello world'
 
 @app.route('/noteFilePaths',methods=['POST', 'GET'])
@@ -35,7 +56,7 @@ def noteDownFilename():
         if 'category' not in k:
             continue
         # import pdb;pdb.set_trace()
-        index = int(re.search('\d+',k)[0]) - 1
+        index = int(re.search('\d+',k)[0])
         outfilepath = Path(cdir[index]) / filename
         shutil.copy(dstfp, outfilepath)
     dstfp.unlink()
@@ -61,4 +82,4 @@ if __name__ == '__main__':
    inputDirP = Path(inputDir)
    allImages = [x for x in inputDirP.glob('*.jpg')]
         
-   app.run(host="0.0.0.0")
+   app.run(host="0.0.0.0",port=args.port)
