@@ -5,9 +5,10 @@ import random
 import re
 import argparse
 import os
-
+import atexit
 
 # inputDir = r'D:\paradise\stuff\Images\walls'
+
 def dir_path(string):
     if os.path.isdir(string):
         return string
@@ -25,10 +26,10 @@ parser.add_argument('--port', type=int,default= 5000)
 
 args = parser.parse_args()
 
-
+listOfFilesDelete = []
 cnffile = args.inputConfig
 # inputDir = r'C:\Heaven\YummyBaked\SuperWemon4\SuperWemon1\club9'
-
+currentImagePath = None
 cdir = []
 
 
@@ -47,6 +48,10 @@ def main():
 @app.route('/noteFilePaths',methods=['POST', 'GET'])
 def noteDownFilename():
     print(request.args)
+    try:
+        deletepartialRederedFiles()
+    except:
+        pass
     filename = request.args['imgfilename']
     dstfp = Path(__file__).parent / 'static' / 'images' / filename
     for k in request.args:
@@ -59,15 +64,32 @@ def noteDownFilename():
         index = int(re.search('\d+',k)[0])
         outfilepath = Path(cdir[index]) / filename
         shutil.copy(dstfp, outfilepath)
-    dstfp.unlink()
+    try:
+        dstfp.unlink()
+    except:
+        listOfFilesDelete.append(dstfp)
+        
         
         
     # print(request.args['category1']).
     return redirect(url_for('main'))
    
-
+def deletepartialRederedFiles():
+    global listOfFilesDelete
+    if len(listOfFilesDelete) > 0:
+        [x.unlink() for x in listOfFilesDelete]
+        listOfFilesDelete = []
+   
+def closingAction():
+    global currentImagePath
+    
+    dstfp = Path.cwd() / 'static' / 'images' / currentImagePath.name
+    shutil.move(dstfp,currentImagePath)
+   
 def imageRender():
+    global currentImagePath
     imgfp = allImages.pop()
+    currentImagePath = imgfp
     dstfp = Path(__file__).parent / 'static' / 'images' / imgfp.name
     dstfp.parent.mkdir(parents=True,exist_ok=True)
     shutil.move(imgfp,dstfp)
@@ -81,5 +103,7 @@ if __name__ == '__main__':
             cdir.append(line)
    inputDirP = Path(inputDir)
    allImages = [x for x in inputDirP.glob('*.jpg')]
-        
+   atexit.register(closingAction)     
    app.run(host="0.0.0.0",port=args.port)
+
+   
